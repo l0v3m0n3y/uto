@@ -15,6 +15,5 @@ do {
 
 # Launch (your script)
 ```
-swiftc -o uto uto.swift main.swift
-./uto
+swift run
 ```

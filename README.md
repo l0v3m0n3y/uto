@@ -6,7 +6,7 @@ import Foundation
 let client = Uto()
 
 do {
-    let res = try await client.get_short_link(link: "http://tvs.tv")
+    let res = try await client.getShortLink(link: "http://tvs.tv")
     print(res)
 } catch {
     print("Error: \(error)")

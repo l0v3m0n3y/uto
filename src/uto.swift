@@ -40,23 +40,33 @@ public class Uto {
         ]
 
     }
-
-    public func get_short_link(link: String) async throws -> Any {
-        guard let url = URL(string: "\(api)/shorten/") else {
+    
+    private func fetchJSON(from urlString: String,method: HTTPMethod = .get,body: Data? = nil,queryParameters: [String: String]? = nil) async throws -> Any {
+        var urlComponents = URLComponents(string: urlString)
+        if let queryParameters = queryParameters {
+            urlComponents?.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+        }
+        guard let url = urlComponents?.url else {
             throw NSError(domain: "Invalid URL", code: -1)
         }
-    
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = method.rawValue
         request.allHTTPHeaderFields = headers
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let body: [String: String] = ["url": link]
- 
-        request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
-    
+        if let body = body {
+            request.httpBody = body
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
         let (data, _) = try await URLSession.shared.data(for: request)
-        let json = try JSONSerialization.jsonObject(with: data)
-    
-        return json
+        return try JSONSerialization.jsonObject(with: data)
+    }
+
+    public func getShortLink(link: String) async throws -> Any {
+        let urlString = "\(api)/shorten/"
+        
+        let body: [String: String] = ["url": link]
+        
+        let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
+        
+        return try await fetchJSON(from: urlString,method: .post,body: bodyData,queryParameters: nil)
     }
 }
